@@ -443,7 +443,8 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
 - (void)writeMessageToWebSocket:(NSDictionary *)object
 {
     NSError *error = nil;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:object options:0 error:&error];
+    NSArray *message = @[object]; // Bayeux messages should be encapsulated in a JSON encoded array.
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message options:0 error:&error];
 
     if (error) {
         if ([self.delegate respondsToSelector:@selector(fayeClient:didFailDeserializeMessage:withError:)]) {
