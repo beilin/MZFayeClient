@@ -139,6 +139,10 @@ typedef void(^MZFayeClientSubscriptionHandler)(NSDictionary *message);
 - (void)subscribeToChannel:(NSString *)channel usingBlock:(MZFayeClientSubscriptionHandler)subscriptionHandler;
 - (void)unsubscribeFromChannel:(NSString *)channel;
 
+- (void)addListenerToChannel:(NSString *)channel;
+- (void)addListenerToChannel:(NSString *)channel usingBlock:(MZFayeClientSubscriptionHandler)subscriptionHandler;
+- (void)removeListenerFromChannel:(NSString *)channel;
+
 - (BOOL)connectToURL:(NSURL *)url;
 - (BOOL)connect;
 

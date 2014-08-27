@@ -63,6 +63,7 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
 @property (nonatomic, readwrite, strong) NSMutableSet *openChannelSubscriptions;
 @property (nonatomic, readwrite, strong) NSMutableSet *pendingChannelSubscriptions;
 @property (nonatomic, readwrite, strong) NSMutableDictionary *subscribedChannels;
+@property (nonatomic, readwrite, strong) NSMutableSet *channelListeners;
 @property (nonatomic, readwrite, strong) NSMutableDictionary *channelExtensions;
 
 @property (nonatomic, readwrite, strong) NSString *clientId;
@@ -303,6 +304,7 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
 {
     [self.pendingChannelSubscriptions removeAllObjects];
     [self.openChannelSubscriptions removeAllObjects];
+    [self.channelListeners removeAllObjects];
 }
 
 #pragma mark - Helper methods
@@ -397,6 +399,37 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
         [self.subscribedChannels removeObjectForKey:channel];
         [self.pendingChannelSubscriptions removeObject:channel];
     }
+}
+
+- (void)addListenerToChannel:(NSString *)channel
+{
+    [self addListenerToChannel:channel usingBlock:nil];
+}
+
+- (void)addListenerToChannel:(NSString *)channel usingBlock:(MZFayeClientSubscriptionHandler)subscriptionHandler
+{
+    if (subscriptionHandler && self.subscribedChannels[channel] && channel) {
+        self.subscribedChannels[channel] = subscriptionHandler;
+        
+    } else if (self.subscribedChannels[channel] || !channel) {
+        return;
+    }
+    
+    if (subscriptionHandler) {
+        [self.subscribedChannels setObject:subscriptionHandler forKey:channel];
+    } else {
+        [self.subscribedChannels setObject:[NSNull null] forKey:channel];
+    }
+    [self.channelListeners addObject:channel];
+}
+
+- (void)removeListenerFromChannel:(NSString *)channel
+{
+    if (!channel || ![self.channelListeners containsObject:channel]) {
+        return;
+    }
+    [self.channelListeners removeObject:channel];
+    [self.subscribedChannels removeObjectForKey:channel];
 }
 
 #pragma mark - Private methods
@@ -563,7 +596,8 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
                 [self didFailWithMessage:[NSString stringWithFormat:@"Faye client couldn't unsubscribe channel %@ with server. %@",fayeMessage.subscription, fayeMessage.error]];
             }
 
-        } else if ([self.openChannelSubscriptions containsObject:fayeMessage.channel]) {
+        } else if ([self.openChannelSubscriptions containsObject:fayeMessage.channel] ||
+                   [self.channelListeners containsObject:fayeMessage.channel]) {
 
             if (self.subscribedChannels[fayeMessage.channel] &&
                 self.subscribedChannels[fayeMessage.channel] != [NSNull null]) {
