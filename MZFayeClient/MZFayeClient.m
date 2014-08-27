@@ -140,6 +140,7 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
         _subscribedChannels = [NSMutableDictionary dictionary];
         _pendingChannelSubscriptions = [NSMutableSet set];
         _openChannelSubscriptions = [NSMutableSet set];
+        _channelListeners = [NSMutableSet set];
         _maximumRetryAttempts = MZFayeClientDefaultMaximumAttempts;
         _retryInterval = MZFayeClientDefaultRetryInterval;
         _shouldRetryConnection = YES;
