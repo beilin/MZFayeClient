@@ -314,7 +314,7 @@ NSInteger const MZFayeClientDefaultMaximumAttempts = 5;
 {
     self.sentMessageCount++;
 
-    return [[NSString stringWithFormat:@"%d",self.sentMessageCount] base64String];
+    return [NSString stringWithFormat:@"%zd",self.sentMessageCount];
 }
 
 #pragma mark - Public methods
